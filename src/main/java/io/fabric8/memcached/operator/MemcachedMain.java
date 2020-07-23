@@ -18,7 +18,7 @@ public class MemcachedMain {
         System.out.println(" class"+kubernetesClient.getClass());
 
         if(nameSpace == null){
-            System.out.println("NameSpace is EMpty, Assigned an Default Namespace");
+            System.out.println("NameSpace is Empty, Assigned an Default Namespace");
             nameSpace = "default";
         }
 
