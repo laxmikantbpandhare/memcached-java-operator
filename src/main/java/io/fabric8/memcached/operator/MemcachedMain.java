@@ -21,7 +21,8 @@ public class MemcachedMain {
             System.out.println("NameSpace is EMpty, Assigned an Default Namespace");
             nameSpace = "default";
         }
-        System.out.println("We are Using Namespace"+nameSpace);
+
+        System.out.println("We are Using Namespace = " + nameSpace);
 
 
 
