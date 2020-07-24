@@ -1,1 +1,8 @@
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/controller_runtime/pkg/Reconciler.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/Memcached.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/controller/MemcachedController.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/controller_runtime/ControllerManager.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedStatus.java
 /Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/MemcachedMain.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedList.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedSpec.java

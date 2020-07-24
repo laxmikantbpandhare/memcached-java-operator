@@ -1,1 +1,10 @@
+io/fabric8/memcached/operator/memcached_types/MemcachedStatus.class
+io/fabric8/memcached/operator/controller/MemcachedController$2.class
+io/fabric8/memcached/operator/controller_runtime/pkg/Reconciler.class
+io/fabric8/memcached/operator/controller_runtime/ControllerManager.class
+io/fabric8/memcached/operator/memcached_types/MemcachedSpec.class
+io/fabric8/memcached/operator/controller/MemcachedController$1.class
+io/fabric8/memcached/operator/memcached_types/Memcached.class
+io/fabric8/memcached/operator/memcached_types/MemcachedList.class
 io/fabric8/memcached/operator/MemcachedMain.class
+io/fabric8/memcached/operator/controller/MemcachedController.class
