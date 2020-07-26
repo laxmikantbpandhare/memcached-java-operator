@@ -95,7 +95,7 @@ public class MemcachedController {
 
     private void reconcile(Memcached memcached){
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
-
+        System.out.println("Reconsile Function");
         if(pods == null || pods.size()==0){
             createPod(memcached.getSpec().getSize(),memcached);
         }

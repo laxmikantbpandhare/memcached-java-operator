@@ -3,4 +3,4 @@ kind: PodSet
 metadata:
   name: example-podset
 spec:
-  size: 3
+  size: 5
