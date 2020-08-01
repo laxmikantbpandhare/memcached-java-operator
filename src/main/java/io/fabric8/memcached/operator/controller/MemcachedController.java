@@ -6,9 +6,10 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 import io.fabric8.kubernetes.client.informers.cache.Lister;
+
+import io.fabric8.memcached.operator.controller_runtime.pkg.Reconciler;
 import io.fabric8.memcached.operator.memcached_types.Memcached;
 
 import java.util.AbstractMap;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class MemcachedController {
+public class MemcachedController implements Reconciler {
 
     public KubernetesClient kubernetesClient;
     public SharedIndexInformer<Pod> podSharedIndexInformer;
@@ -93,19 +94,23 @@ public class MemcachedController {
         }
     }
 
-    private void reconcile(Memcached memcached){
+    public void reconcile(Memcached memcached){
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
-        System.out.println("Reconsile Function");
+        System.out.println("Reconcile Function");
         if(pods == null || pods.size()==0){
             createPod(memcached.getSpec().getSize(),memcached);
         }
 
         int existingPods = pods.size();
         int desiredPods = memcached.getSpec().getSize();
+        System.out.println("Reconcile Function desired"+desiredPods);
+        System.out.println("Reconcile Function existing "+existingPods);
         if(existingPods < desiredPods){
+            System.out.println("in if"+desiredPods);
             createPod(desiredPods-existingPods,memcached);
         }
-        else if(desiredPods > existingPods){
+        else if(desiredPods < existingPods){
+            System.out.println("in else"+desiredPods);
             String podName =  pods.remove(0);
             kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).withName(podName).delete();
         }
@@ -117,6 +122,8 @@ public class MemcachedController {
             kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).create(pod);
         }
     }
+
+
 
     private Pod createNewPod(Memcached memcached){
         return new PodBuilder()
