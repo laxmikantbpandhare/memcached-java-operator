@@ -9,7 +9,8 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 import io.fabric8.kubernetes.client.informers.cache.Lister;
 
-import io.fabric8.memcached.operator.controller_runtime.pkg.Reconciler;
+//import io.fabric8.memcached.operator.controller_runtime.pkg.Reconciler;
+//import io.fabric8.memcached.operator.controller_runtime.pkg.Request;
 import io.fabric8.memcached.operator.memcached_types.Memcached;
 
 import java.util.AbstractMap;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class MemcachedController implements Reconciler {
+public class MemcachedController{//} implements Reconciler {
 
     public KubernetesClient kubernetesClient;
     public SharedIndexInformer<Pod> podSharedIndexInformer;
@@ -96,7 +97,10 @@ public class MemcachedController implements Reconciler {
 
     public void reconcile(Memcached memcached){
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
-        System.out.println("Reconcile Function");
+        System.out.println("Reconcile Function"+memcached.getMetadata().getName());
+        for(int i=0;i<pods.size();i++){
+            System.out.println("Reconcile Function pods"+ pods.get(i));
+        }
         if(pods == null || pods.size()==0){
             createPod(memcached.getSpec().getSize(),memcached);
         }
@@ -111,8 +115,11 @@ public class MemcachedController implements Reconciler {
         }
         else if(desiredPods < existingPods){
             System.out.println("in else"+desiredPods);
-            String podName =  pods.remove(0);
-            kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).withName(podName).delete();
+            int diff = existingPods - desiredPods;
+            for(int i=0;i<diff;i++) {
+                String podName = pods.remove(0);
+                kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).withName(podName).delete();
+            }
         }
     }
 
@@ -178,4 +185,9 @@ public class MemcachedController implements Reconciler {
         return null;
     }
 
+
+//    @Override
+//    public void reconcile(Request request) {
+//
+//    }
 }

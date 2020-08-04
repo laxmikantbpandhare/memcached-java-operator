@@ -8,7 +8,8 @@ import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.memcached.operator.controller.MemcachedController;
-import io.fabric8.memcached.operator.controller_runtime.pkg.Request;
+//import io.fabric8.memcached.operator.controller_runtime.pkg.Request;
+//import io.fabric8.memcached.operator.controller_runtime.pkg.Request;
 import io.fabric8.memcached.operator.memcached_types.Memcached;
 import io.fabric8.memcached.operator.memcached_types.MemcachedList;
 
@@ -31,7 +32,7 @@ public class MemcachedMain {
             nameSpace = "default";
         }
 
-        Request request;
+     //   Request request;
         CustomResourceDefinitionContext customResourceDefinitionContext = new CustomResourceDefinitionContext.Builder()
                 .withVersion("v1alpha1")
                 .withScope("Namespaces")
@@ -43,10 +44,10 @@ public class MemcachedMain {
 
         SharedInformerFactory sharedInformerFactory = kubernetesClient.informers();
 
-        SharedIndexInformer<Pod> podSharedIndexInformer =  sharedInformerFactory.sharedIndexInformerFor(Pod.class, PodList.class,60 * 1000);
+        SharedIndexInformer<Pod> podSharedIndexInformer =  sharedInformerFactory.sharedIndexInformerFor(Pod.class, PodList.class,10 * 60 * 1000);
 
         SharedIndexInformer<Memcached> memcachedSharedIndexInformer = sharedInformerFactory
-                .sharedIndexInformerForCustomResource(customResourceDefinitionContext,Memcached.class, MemcachedList.class,60*1000);
+                .sharedIndexInformerForCustomResource(customResourceDefinitionContext,Memcached.class, MemcachedList.class,10 * 60*1000);
 
         MemcachedController memcachedController =  new MemcachedController(kubernetesClient,podSharedIndexInformer,memcachedSharedIndexInformer);
         memcachedController.create();
