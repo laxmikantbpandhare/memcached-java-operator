@@ -64,9 +64,6 @@ public class MemcachedController{//} implements Reconciler {
 
             @Override
             public void onUpdate(Pod oldPod, Pod newPod) {
-//                if (oldPod.getMetadata().getResourceVersion() == newPod.getMetadata().getResourceVersion()) {
-//                    return;
-//                }
                 handlePodObject(newPod);
             }
 
