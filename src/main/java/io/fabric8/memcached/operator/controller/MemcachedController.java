@@ -1,5 +1,9 @@
 package io.fabric8.memcached.operator.controller;
 
+import io.fabric8.controller.controller_runtime.DefaultController;
+import io.fabric8.controller.controller_runtime.pkg.Reconciler;
+import io.fabric8.controller.controller_runtime.pkg.Request;
+import io.fabric8.controller.controller_runtime.pkg.Result;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
@@ -9,8 +13,8 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 import io.fabric8.kubernetes.client.informers.cache.Lister;
 
-//import io.fabric8.memcached.operator.controller_runtime.pkg.Reconciler;
-//import io.fabric8.memcached.operator.controller_runtime.pkg.Request;
+
+
 import io.fabric8.memcached.operator.memcached_types.Memcached;
 
 import java.util.AbstractMap;
@@ -20,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class MemcachedController{//} implements Reconciler {
+public class MemcachedController implements Reconciler {
 
     public KubernetesClient kubernetesClient;
     public SharedIndexInformer<Pod> podSharedIndexInformer;
@@ -28,6 +32,8 @@ public class MemcachedController{//} implements Reconciler {
     private BlockingQueue<String> workQueue;
     private Lister<Memcached> memcachedLister;
     private Lister<Pod> podLister;
+    DefaultController defaultController;
+
 
     public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer){
         this.kubernetesClient = kubernetesClient;
@@ -74,6 +80,7 @@ public class MemcachedController{//} implements Reconciler {
 
     public void run() throws InterruptedException {
 
+        defaultController.run();
         while (!memcachedSharedIndexInformer.hasSynced() || !podSharedIndexInformer.hasSynced());
 
         while(true){
@@ -88,11 +95,13 @@ public class MemcachedController{//} implements Reconciler {
             if(memcached ==  null) {
                 return;
             }
-            reconcile(memcached);
+            this.reconcile1(memcached);
+
         }
     }
 
-    public void reconcile(Memcached memcached){
+    public void reconcile1(Memcached memcached){
+
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
         System.out.println("Reconcile Function"+memcached.getMetadata().getName());
         for(int i=0;i<pods.size();i++){
@@ -184,7 +193,8 @@ public class MemcachedController{//} implements Reconciler {
 
 
 //    @Override
-//    public void reconcile(Request request) {
-//
-//    }
+    public Result reconcile(Request request) {
+        System.out.println("calling reconsile from defaul controller");
+        return null;
+    }
 }

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="memcached-java-operator-1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../java-controller-runtime/target/memcached-java-operator-1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
