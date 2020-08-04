@@ -1,5 +1,6 @@
 package io.fabric8.memcached.operator.controller;
 
+
 import io.fabric8.controller.controller_runtime.DefaultController;
 import io.fabric8.controller.controller_runtime.pkg.Reconciler;
 import io.fabric8.controller.controller_runtime.pkg.Request;

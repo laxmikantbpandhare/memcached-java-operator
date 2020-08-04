@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="java-controller-runtime-1.0-SNAPSHOT-jar-with-dependencies">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../java-controller-runtime/target/java-controller-runtime-1.0-SNAPSHOT-jar-with-dependencies.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../java-controller-runtime/target/java-controller-runtime-1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
