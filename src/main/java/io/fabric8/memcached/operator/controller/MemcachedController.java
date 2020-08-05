@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class MemcachedController implements Reconciler {
+public class MemcachedController {//implements Reconciler {
 
     public KubernetesClient kubernetesClient;
     public SharedIndexInformer<Pod> podSharedIndexInformer;
@@ -33,7 +33,7 @@ public class MemcachedController implements Reconciler {
     private BlockingQueue<String> workQueue;
     private Lister<Memcached> memcachedLister;
     private Lister<Pod> podLister;
-    DefaultController defaultController;
+   // DefaultController defaultController;
 
 
     public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer){
@@ -43,6 +43,7 @@ public class MemcachedController implements Reconciler {
         this.workQueue = new ArrayBlockingQueue<>(1024);
         this.memcachedLister = new Lister<>(memcachedSharedIndexInformer.getIndexer(),"default");
         this.podLister = new Lister<>(podSharedIndexInformer.getIndexer(),"default");
+      //  defaultController = new DefaultController();
     }
 
     public void create(){
@@ -81,7 +82,9 @@ public class MemcachedController implements Reconciler {
 
     public void run() throws InterruptedException {
 
-        defaultController.run();
+        MemcachedReconciler reconciler = new MemcachedReconciler();
+        DefaultController defaultController = new DefaultController(reconciler);
+        defaultController.runMethod();
         while (!memcachedSharedIndexInformer.hasSynced() || !podSharedIndexInformer.hasSynced());
 
         while(true){
@@ -194,8 +197,8 @@ public class MemcachedController implements Reconciler {
 
 
 //    @Override
-    public Result reconcile(Request request) {
-        System.out.println("calling reconsile from defaul controller");
-        return null;
-    }
+//    public Result reconcile(Request request) {
+//        System.out.println("calling reconcile from default controller");
+//        return null;
+//    }
 }

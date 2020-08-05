@@ -3,4 +3,5 @@
 /Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedStatus.java
 /Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/MemcachedMain.java
 /Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedList.java
+/Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/controller/MemcachedReconciler.java
 /Users/laxmikantbhaskarpandhare/Desktop/Development/memcached-java-operator/src/main/java/io/fabric8/memcached/operator/memcached_types/MemcachedSpec.java
