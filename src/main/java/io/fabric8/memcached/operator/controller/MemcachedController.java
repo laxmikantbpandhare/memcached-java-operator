@@ -47,20 +47,23 @@ public class MemcachedController {//implements Reconciler {
     }
 
     public void create(){
+
         memcachedSharedIndexInformer.addEventHandler(new ResourceEventHandler<Memcached>() {
             @Override
             public void onAdd(Memcached memcached) {
                 enQueueMemcached(memcached);
+                System.out.println("memcachedSharedIndexInformer onAdd method Function pods");
             }
 
             @Override
             public void onUpdate(Memcached memcached, Memcached newMemcached) {
-                enQueueMemcached(newMemcached);
+             //   enQueueMemcached(newMemcached);
+                System.out.println("memcachedSharedIndexInformer onUpdate method Function pods");
             }
 
             @Override
             public void onDelete(Memcached memcached, boolean b) {
-
+                System.out.println("memcachedSharedIndexInformer onDelete method Function pods");
             }
         });
 
@@ -68,26 +71,33 @@ public class MemcachedController {//implements Reconciler {
             @Override
             public void onAdd(Pod pod) {
                 handlePodObject(pod);
+                System.out.println("podSharedIndexInformer onAdd method Function pods");
             }
 
             @Override
             public void onUpdate(Pod oldPod, Pod newPod) {
                 handlePodObject(newPod);
+                System.out.println("podSharedIndexInformer onUpdate method Function pods");
             }
 
             @Override
-            public void onDelete(Pod pod, boolean b) { }
+            public void onDelete(Pod pod, boolean b) {
+                System.out.println("podSharedIndexInformer onDelete method Function pods");
+            }
         });
     }
 
     public void run() throws InterruptedException {
 
+        System.out.println("I am in Thread run() method");
         MemcachedReconciler reconciler = new MemcachedReconciler();
         DefaultController defaultController = new DefaultController(reconciler);
         defaultController.runMethod();
+
         while (!memcachedSharedIndexInformer.hasSynced() || !podSharedIndexInformer.hasSynced());
 
         while(true){
+            System.out.println("while loop method");
             String key = workQueue.take();
 
             if(key == null || key.isEmpty() || (!key.contains("/"))){
@@ -100,7 +110,6 @@ public class MemcachedController {//implements Reconciler {
                 return;
             }
             this.reconcile1(memcached);
-
         }
     }
 
@@ -111,14 +120,16 @@ public class MemcachedController {//implements Reconciler {
         for(int i=0;i<pods.size();i++){
             System.out.println("Reconcile Function pods"+ pods.get(i));
         }
-        if(pods == null || pods.size()==0){
-            createPod(memcached.getSpec().getSize(),memcached);
-        }
+
+//        if(pods == null || pods.size()==0){
+//            System.out.println("Size"+ memcached.getSpec().getSize());
+//            createPod(memcached.getSpec().getSize(),memcached);
+//        }
 
         int existingPods = pods.size();
         int desiredPods = memcached.getSpec().getSize();
         System.out.println("Reconcile Function desired"+desiredPods);
-        System.out.println("Reconcile Function existing "+existingPods);
+        System.out.println("Reconcile Function existing"+existingPods);
         if(existingPods < desiredPods){
             System.out.println("in if"+desiredPods);
             createPod(desiredPods-existingPods,memcached);
@@ -126,7 +137,9 @@ public class MemcachedController {//implements Reconciler {
         else if(desiredPods < existingPods){
             System.out.println("in else"+desiredPods);
             int diff = existingPods - desiredPods;
+            System.out.println("Diff"+diff);
             for(int i=0;i<diff;i++) {
+                System.out.println("For loop");
                 String podName = pods.remove(0);
                 kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).withName(podName).delete();
             }
@@ -134,6 +147,7 @@ public class MemcachedController {//implements Reconciler {
     }
 
     private void createPod(int noOfPods, Memcached memcached){
+//        System.out.println("Create Pod Gets called");
         for(int i = 0;i<noOfPods;i++){
             Pod pod = createNewPod(memcached);
             kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).create(pod);
@@ -143,6 +157,7 @@ public class MemcachedController {//implements Reconciler {
 
 
     private Pod createNewPod(Memcached memcached){
+//        System.out.println("createNewPod Function"+memcached.getMetadata().getName());
         return new PodBuilder()
                 .withNewMetadata()
                 .withGenerateName(memcached.getMetadata().getName() + "-pod")
@@ -156,6 +171,7 @@ public class MemcachedController {//implements Reconciler {
     }
 
     private List<String> podCountByLabel(String label, String memcachedName){
+//        System.out.println("podCountByLabel Function"+memcachedName);
         List<String> podNames = new ArrayList<>();
         List<Pod> pods = podLister.list();
 
@@ -170,22 +186,27 @@ public class MemcachedController {//implements Reconciler {
 
     private void enQueueMemcached(Memcached memcached){
         String key = Cache.metaNamespaceKeyFunc(memcached);
+//        System.out.println("enQueueMemcached added Pod Gets called"+key);
         if(key!=null || !(key.isEmpty())){
+            System.out.println("workqued added Pod Gets called");
             workQueue.add(key);
         }
     }
 
     private void handlePodObject(Pod pod){
+//        System.out.println("handlePodObject added Pod Gets called");
         OwnerReference ownerReference = getController(pod);
         if(!ownerReference.getKind().equalsIgnoreCase("MemCached")){
             return;
         }
         Memcached memcached =  memcachedLister.get(ownerReference.getName());
+        System.out.println("handlePodObject memcached added Pod Gets called");
         if(memcached!=null)
             enQueueMemcached(memcached);
     }
 
     private OwnerReference getController(Pod pod){
+//        System.out.println("getController Gets called");
         List<OwnerReference> ownerReferenceList = pod.getMetadata().getOwnerReferences();
         for(OwnerReference ownerReference : ownerReferenceList){
             if(ownerReference.getController().equals(Boolean.TRUE)){

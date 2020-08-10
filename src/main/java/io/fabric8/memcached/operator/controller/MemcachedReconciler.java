@@ -8,7 +8,7 @@ public class MemcachedReconciler implements Reconciler {
 
     @Override
     public Result reconcile(Request request) {
-        System.out.println("calling reconcile from default controller ala ka bhau");
+        System.out.println("calling reconcile from default controller");
         return null;
     }
 }
