@@ -1,6 +1,8 @@
 package io.fabric8.memcached.operator.controller;
 
 
+import io.fabric8.controller.controller_runtime.Controller;
+import io.fabric8.controller.controller_runtime.Controllers;
 import io.fabric8.controller.controller_runtime.DefaultController;
 import io.fabric8.controller.controller_runtime.pkg.Reconciler;
 import io.fabric8.controller.controller_runtime.pkg.Request;
@@ -17,33 +19,47 @@ import io.fabric8.kubernetes.client.informers.cache.Lister;
 
 
 import io.fabric8.memcached.operator.memcached_types.Memcached;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.*;
+import java.util.logging.LogManager;
 
 public class MemcachedController {//implements Reconciler {
+    private static final Logger logger = LoggerFactory.getLogger(MemcachedController.class);
+  //  private static final Logger logger = (Logger) LogManager.getLogger(MemcachedController.class);
 
     public KubernetesClient kubernetesClient;
     public SharedIndexInformer<Pod> podSharedIndexInformer;
     public SharedIndexInformer<Memcached> memcachedSharedIndexInformer;
     private BlockingQueue<String> workQueue;
+    private BlockingQueue<Request> workQueue1;
     private Lister<Memcached> memcachedLister;
     private Lister<Pod> podLister;
+    private Controller[] controllers;
    // DefaultController defaultController;
-
+   private int workerCount = 2;
+    private String controllerName = "memcached-controller";
+    private ExecutorService controllerThreadPool;
+    DefaultController defaultController;// = new DefaultController();
 
     public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer){
         this.kubernetesClient = kubernetesClient;
         this.podSharedIndexInformer = podSharedIndexInformer;
         this.memcachedSharedIndexInformer = memcachedSharedIndexInformer;
         this.workQueue = new ArrayBlockingQueue<>(1024);
+        this.workQueue1 = new ArrayBlockingQueue<>(1024);
         this.memcachedLister = new Lister<>(memcachedSharedIndexInformer.getIndexer(),"default");
         this.podLister = new Lister<>(podSharedIndexInformer.getIndexer(),"default");
-      //  defaultController = new DefaultController();
+        defaultController = new DefaultController();
+    }
+
+    public MemcachedController() {
+
     }
 
     public void create(){
@@ -82,17 +98,49 @@ public class MemcachedController {//implements Reconciler {
 
             @Override
             public void onDelete(Pod pod, boolean b) {
+                handlePodObject(pod);
                 System.out.println("podSharedIndexInformer onDelete method Function pods");
             }
         });
     }
 
+    public void initializeDefaultController(){
+        //        Memcached memcached1 =  this.memcachedLister.namespace("namespace").get("name");
+        System.out.println("I am in Thread run() method");
+        MemcachedReconciler reconciler = new MemcachedReconciler(kubernetesClient,podLister,memcachedLister);
+        defaultController.setWorkQueue(workQueue1);
+        defaultController.setName(this.controllerName);
+        defaultController.setWorkerCount(this.workerCount);
+        defaultController.setWorkerThreadPool(
+                Executors.newScheduledThreadPool(
+                        this.workerCount, Controllers.namedControllerThreadFactory(this.controllerName)));
+        defaultController.setReconciler(reconciler);
+        this.controllers = new Controller[]{defaultController};
+    }
+
     public void run() throws InterruptedException {
 
-        System.out.println("I am in Thread run() method");
-        MemcachedReconciler reconciler = new MemcachedReconciler();
-        DefaultController defaultController = new DefaultController(reconciler);
-        defaultController.runMethod();
+        this.initializeDefaultController();
+
+        System.out.println("Controller length"+controllers.length);
+        CountDownLatch latch = new CountDownLatch(controllers.length);
+        this.controllerThreadPool = Executors.newFixedThreadPool(controllers.length);
+        for (Controller controller : this.controllers) {
+            controllerThreadPool.submit(
+                    () -> {
+                        controller.run();
+                        latch.countDown();
+                    });
+        }
+        try {
+            logger.debug("Controller-Manager {} bootstrapping..", this.controllerName);
+            latch.await();
+        } catch (InterruptedException e) {
+            logger.error("Aborting controller-manager.", e);
+        } finally {
+            logger.info("Controller-Manager {} exited", this.controllerName);
+        }
+
 
         while (!memcachedSharedIndexInformer.hasSynced() || !podSharedIndexInformer.hasSynced());
 
@@ -188,19 +236,29 @@ public class MemcachedController {//implements Reconciler {
         String key = Cache.metaNamespaceKeyFunc(memcached);
 //        System.out.println("enQueueMemcached added Pod Gets called"+key);
         if(key!=null || !(key.isEmpty())){
-            System.out.println("workqued added Pod Gets called");
-            workQueue.add(key);
+            System.out.println("workqued added Pod Gets called"+memcached.getMetadata().getNamespace());
+            System.out.println("workqued added Pod Gets called"+memcached.getMetadata().getName());
+//            System.out.println("before workQueue1 added Pod Gets called"+workQueue1);
+//            workQueue.add(key);
+
+            workQueue1.add(new Request(memcached.getMetadata().getNamespace(), memcached.getMetadata().getName()));
+            BlockingQueue<Request> workQueue2 =  defaultController.getWorkQueue();
+            workQueue2.add(new Request(memcached.getMetadata().getNamespace(), memcached.getMetadata().getName()));
+            defaultController.setWorkQueue(workQueue2);
+//            System.out.println("after workQueue1 added Pod Gets called"+workQueue2);
         }
     }
 
     private void handlePodObject(Pod pod){
 //        System.out.println("handlePodObject added Pod Gets called");
         OwnerReference ownerReference = getController(pod);
-        if(!ownerReference.getKind().equalsIgnoreCase("MemCached")){
+//        System.out.println("handlePodObject added Pod Gets called"+ownerReference);
+        System.out.println("handlePodObject added Pod Gets called"+ownerReference.getKind());
+        if(!ownerReference.getKind().equalsIgnoreCase("Podset")){
             return;
         }
         Memcached memcached =  memcachedLister.get(ownerReference.getName());
-        System.out.println("handlePodObject memcached added Pod Gets called");
+//        System.out.println("handlePodObject memcached added Pod Gets called");
         if(memcached!=null)
             enQueueMemcached(memcached);
     }
@@ -215,11 +273,4 @@ public class MemcachedController {//implements Reconciler {
         }
         return null;
     }
-
-
-//    @Override
-//    public Result reconcile(Request request) {
-//        System.out.println("calling reconcile from default controller");
-//        return null;
-//    }
 }
