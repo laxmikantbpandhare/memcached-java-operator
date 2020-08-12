@@ -4,6 +4,7 @@ package io.fabric8.memcached.operator.controller;
 import io.fabric8.controller.controller_runtime.Controller;
 import io.fabric8.controller.controller_runtime.Controllers;
 import io.fabric8.controller.controller_runtime.DefaultController;
+import io.fabric8.controller.controller_runtime.Manager;
 import io.fabric8.controller.controller_runtime.pkg.Reconciler;
 import io.fabric8.controller.controller_runtime.pkg.Request;
 import io.fabric8.controller.controller_runtime.pkg.Result;
@@ -13,6 +14,7 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
+import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 import io.fabric8.kubernetes.client.informers.cache.Lister;
 
@@ -41,13 +43,14 @@ public class MemcachedController {//implements Reconciler {
     private Lister<Memcached> memcachedLister;
     private Lister<Pod> podLister;
     private Controller[] controllers;
-   // DefaultController defaultController;
+    SharedInformerFactory sharedInformerFactory;
+    // DefaultController defaultController;
    private int workerCount = 2;
     private String controllerName = "memcached-controller";
     private ExecutorService controllerThreadPool;
     DefaultController defaultController;// = new DefaultController();
 
-    public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer){
+    public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer,SharedInformerFactory sharedInformerFactory ){
         this.kubernetesClient = kubernetesClient;
         this.podSharedIndexInformer = podSharedIndexInformer;
         this.memcachedSharedIndexInformer = memcachedSharedIndexInformer;
@@ -56,6 +59,7 @@ public class MemcachedController {//implements Reconciler {
         this.memcachedLister = new Lister<>(memcachedSharedIndexInformer.getIndexer(),"default");
         this.podLister = new Lister<>(podSharedIndexInformer.getIndexer(),"default");
         defaultController = new DefaultController();
+        this.sharedInformerFactory = sharedInformerFactory;
     }
 
     public MemcachedController() {
@@ -122,24 +126,27 @@ public class MemcachedController {//implements Reconciler {
 
         this.initializeDefaultController();
 
-        System.out.println("Controller length"+controllers.length);
-        CountDownLatch latch = new CountDownLatch(controllers.length);
-        this.controllerThreadPool = Executors.newFixedThreadPool(controllers.length);
-        for (Controller controller : this.controllers) {
-            controllerThreadPool.submit(
-                    () -> {
-                        controller.run();
-                        latch.countDown();
-                    });
-        }
-        try {
-            logger.debug("Controller-Manager {} bootstrapping..", this.controllerName);
-            latch.await();
-        } catch (InterruptedException e) {
-            logger.error("Aborting controller-manager.", e);
-        } finally {
-            logger.info("Controller-Manager {} exited", this.controllerName);
-        }
+        Manager manager = new Manager(sharedInformerFactory,controllers);
+        manager.run();
+
+//        System.out.println("Controller length"+controllers.length);
+//        CountDownLatch latch = new CountDownLatch(controllers.length);
+//        this.controllerThreadPool = Executors.newFixedThreadPool(controllers.length);
+//        for (Controller controller : this.controllers) {
+//            controllerThreadPool.submit(
+//                    () -> {
+//                        controller.run();
+//                        latch.countDown();
+//                    });
+//        }
+//        try {
+//            logger.debug("Controller-Manager {} bootstrapping..", this.controllerName);
+//            latch.await();
+//        } catch (InterruptedException e) {
+//            logger.error("Aborting controller-manager.", e);
+//        } finally {
+//            logger.info("Controller-Manager {} exited", this.controllerName);
+//        }
 
 
         while (!memcachedSharedIndexInformer.hasSynced() || !podSharedIndexInformer.hasSynced());

@@ -49,9 +49,9 @@ public class MemcachedMain {
         SharedIndexInformer<Memcached> memcachedSharedIndexInformer = sharedInformerFactory
                 .sharedIndexInformerForCustomResource(customResourceDefinitionContext,Memcached.class, MemcachedList.class,5 * 60 * 1000);
 
-        MemcachedController memcachedController =  new MemcachedController(kubernetesClient,podSharedIndexInformer,memcachedSharedIndexInformer);
+        MemcachedController memcachedController =  new MemcachedController(kubernetesClient,podSharedIndexInformer,memcachedSharedIndexInformer,sharedInformerFactory);
         memcachedController.create();
-        sharedInformerFactory.startAllRegisteredInformers();
+//        sharedInformerFactory.startAllRegisteredInformers();
         memcachedController.run();
 
 //        ApiClient client = Config.defaultClient();
