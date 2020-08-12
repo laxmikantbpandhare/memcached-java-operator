@@ -64,7 +64,7 @@ public class MemcachedController {
 
             @Override
             public void onDelete(Memcached memcached, boolean b) {
-//                System.out.println("memcachedSharedIndexInformer onDelete method Function pods");
+                //   enQueueMemcached(newMemcached);
             }
         });
 
@@ -87,7 +87,7 @@ public class MemcachedController {
     }
 
     public void initializeDefaultController(){
-        System.out.println("I am in Thread run() method");
+        System.out.println("Initialize the Default Controller");
         MemcachedReconciler reconciler = new MemcachedReconciler(kubernetesClient,podLister,memcachedLister);
         defaultController.setWorkQueue(workQueue);
         defaultController.setName(this.controllerName);

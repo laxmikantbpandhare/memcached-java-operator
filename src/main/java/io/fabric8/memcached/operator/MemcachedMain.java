@@ -15,12 +15,6 @@ public class MemcachedMain {
 
     public static void main(String args[]) throws InterruptedException {
         KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-//        String nameSpace = kubernetesClient.getNamespace();
-//
-//        if(nameSpace == null){
-//            System.out.println("NameSpace is Empty, Assigned an Default Namespace");
-//            nameSpace = "default";
-//        }
 
         CustomResourceDefinitionContext customResourceDefinitionContext = new CustomResourceDefinitionContext.Builder()
                 .withVersion("v1alpha1")

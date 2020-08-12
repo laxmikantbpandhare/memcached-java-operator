@@ -32,30 +32,19 @@ public class MemcachedReconciler implements Reconciler {
     @Override
     public Result reconcile(Request request) {
 
-        System.out.println("calling reconcile from default controller");
+        System.out.println("Reconcilation started");
 
         Memcached memcached =  this.memcachedLister.namespace(request.getNamespace()).get(request.getName());
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
 
-//        if(pods == null || pods.size()==0){
-//            System.out.println("Size"+ memcached.getSpec().getSize());
-//            createPod(memcached.getSpec().getSize(),memcached);
-//        }
-
         int existingPods = pods.size();
         int desiredPods = memcached.getSpec().getSize();
-//        System.out.println("Reconcile Function desired"+desiredPods);
-//        System.out.println("Reconcile Function existing"+existingPods);
         if(existingPods < desiredPods){
-//            System.out.println("in if"+desiredPods);
             createPod(desiredPods-existingPods,memcached);
         }
         else if(desiredPods < existingPods){
-//            System.out.println("in else"+desiredPods);
             int diff = existingPods - desiredPods;
-//            System.out.println("Diff"+diff);
             for(int i=0;i<diff;i++) {
-//                System.out.println("For loop");
                 String podName = pods.remove(0);
                 kubernetesClient.pods().inNamespace(memcached.getMetadata().getNamespace()).withName(podName).delete();
             }
