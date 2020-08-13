@@ -2,23 +2,23 @@ package io.fabric8.memcached.operator.memcached_types;
 
 public class MemcachedSpec {
 
-    private int size;
+    private int Size;
 
     /**
-     * Gets size.
+     * Gets Size.
      *
-     * @return the get size
+     * @return the get Size
      */
     public int getSize() {
-        return size;
+        return Size;
     }
 
     /**
-     * Sets size.
+     * Sets Size.
      *
-     * @param size the size
+     * @param size the spec
      */
     public void setSize(int size) {
-        size = size;
+        Size = size;
     }
 }
