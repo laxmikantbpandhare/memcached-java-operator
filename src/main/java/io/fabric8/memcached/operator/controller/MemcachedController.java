@@ -34,6 +34,14 @@ public class MemcachedController {
     private String controllerName = "memcached-controller";
     DefaultController defaultController;
 
+    /**
+     * Instantiates a new Memcached controller.
+     *
+     * @param kubernetesClient the kubernetes client
+     * @param podSharedIndexInformer the watch for pod
+     * @param memcachedSharedIndexInformer the watch for memcached
+     * @param sharedInformerFactory the watch object
+     */
     public MemcachedController(KubernetesClient kubernetesClient, SharedIndexInformer<Pod> podSharedIndexInformer, SharedIndexInformer<Memcached> memcachedSharedIndexInformer,SharedInformerFactory sharedInformerFactory ){
         this.kubernetesClient = kubernetesClient;
         this.podSharedIndexInformer = podSharedIndexInformer;
@@ -49,6 +57,9 @@ public class MemcachedController {
 
     }
 
+    /**
+     * It will create add/update/delete events for memcached and pods.
+     */
     public void create(){
 
         memcachedSharedIndexInformer.addEventHandler(new ResourceEventHandler<Memcached>() {
@@ -87,6 +98,10 @@ public class MemcachedController {
         });
     }
 
+    /**
+     * This function will initialize all the requred data and call appropriate methods from the
+     * Java Controller runtime.
+     */
     public void initializeDefaultController(){
         System.out.println("Initialize the Default Controller");
         MemcachedReconciler reconciler = new MemcachedReconciler(kubernetesClient,podLister,memcachedLister);
@@ -106,6 +121,12 @@ public class MemcachedController {
         manager.run();
     }
 
+    /**
+     * Enqueue the data into the workQueue, after add/update/delete events in the cluster
+     *
+     * @param memcached the controller name
+     * @return
+     */
     private void enQueueMemcached(Memcached memcached){
         String key = Cache.metaNamespaceKeyFunc(memcached);;
         if(key!=null || !(key.isEmpty())){
@@ -115,6 +136,13 @@ public class MemcachedController {
         }
     }
 
+    /**
+     * this function will check the OwnerReference and then call's then enQueueMemcached for
+     * enqueing the data into workQueue.
+     *
+     * @param pod the pod object
+     * @return
+     */
     private void handlePodObject(Pod pod){
         OwnerReference ownerReference = getController(pod);
         if(!ownerReference.getKind().equalsIgnoreCase("Podset")){
@@ -125,6 +153,12 @@ public class MemcachedController {
             enQueueMemcached(memcached);
     }
 
+    /**
+     * this function will return then OwnerReference of an Pod object.
+     *
+     * @param pod the pod object
+     * @return OwnerReference the object of type OwnerReference
+     */
     private OwnerReference getController(Pod pod){
         List<OwnerReference> ownerReferenceList = pod.getMetadata().getOwnerReferences();
         for(OwnerReference ownerReference : ownerReferenceList){

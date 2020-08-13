@@ -19,6 +19,13 @@ public class MemcachedReconciler implements Reconciler {
     private Lister<Pod> podLister;
     public KubernetesClient kubernetesClient;
 
+    /**
+     * Instantiates a new Memcached Reconciler.
+     *
+     * @param kubernetesClient the kubernetes client
+     * @param podLister the pod lister
+     * @param memcachedLister the memcached lister
+     */
     public MemcachedReconciler(KubernetesClient kubernetesClient, Lister<Pod> podLister, Lister<Memcached> memcachedLister){
         this.kubernetesClient = kubernetesClient;
         this.podLister = podLister;
@@ -51,6 +58,13 @@ public class MemcachedReconciler implements Reconciler {
         return null;
     }
 
+    /**
+     * This function will list out the pod names and return he entire list
+     *
+     * @param label the label
+     * @param memcachedName the memcached name
+     * @return podNames the list of pod names
+     */
     private List<String> podCountByLabel(String label, String memcachedName){
         List<String> podNames = new ArrayList<>();
         List<Pod> pods = podLister.list();
@@ -63,6 +77,12 @@ public class MemcachedReconciler implements Reconciler {
         return podNames;
     }
 
+    /**
+     * It will create the pod according to the number of pods specified in the input.
+     *
+     * @param noOfPods the number of pods
+     * @param memcached the memcached object
+     */
     private void createPod(int noOfPods, Memcached memcached){
         for(int i = 0;i<noOfPods;i++){
             Pod pod = createNewPod(memcached);
@@ -70,6 +90,12 @@ public class MemcachedReconciler implements Reconciler {
         }
     }
 
+    /**
+     * It will create the pod.
+     *
+     * @param memcached the memcached object
+     * @return Pod the Pod object
+     */
     private Pod createNewPod(Memcached memcached){
         return new PodBuilder()
                 .withNewMetadata()

@@ -13,6 +13,7 @@ import io.fabric8.memcached.operator.memcached_types.MemcachedList;
 
 public class MemcachedMain {
 
+    /** Main method where operator execution starts **/
     public static void main(String args[]) throws InterruptedException {
         KubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
