@@ -32,8 +32,7 @@ public class MemcachedReconciler implements Reconciler {
     @Override
     public Result reconcile(Request request) {
 
-        System.out.println("Reconcilation started");
-
+        System.out.println("Reconcilation started"+request.getNamespace()+" name   "+request.getName());
         Memcached memcached =  this.memcachedLister.namespace(request.getNamespace()).get(request.getName());
         List<String> pods = podCountByLabel("app",memcached.getMetadata().getName());
 

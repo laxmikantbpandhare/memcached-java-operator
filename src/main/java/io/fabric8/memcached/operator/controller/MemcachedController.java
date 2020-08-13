@@ -76,7 +76,8 @@ public class MemcachedController {
 
             @Override
             public void onUpdate(Pod oldPod, Pod newPod) {
-                handlePodObject(newPod);
+
+//                handlePodObject(newPod);
             }
 
             @Override

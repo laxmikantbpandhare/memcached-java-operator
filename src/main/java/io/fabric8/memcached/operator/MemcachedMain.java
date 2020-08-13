@@ -25,10 +25,10 @@ public class MemcachedMain {
 
         SharedInformerFactory sharedInformerFactory = kubernetesClient.informers();
 
-        SharedIndexInformer<Pod> podSharedIndexInformer =  sharedInformerFactory.sharedIndexInformerFor(Pod.class, PodList.class,10 * 60 * 1000);
+        SharedIndexInformer<Pod> podSharedIndexInformer =  sharedInformerFactory.sharedIndexInformerFor(Pod.class, PodList.class,1 * 60 * 1000);
 
         SharedIndexInformer<Memcached> memcachedSharedIndexInformer = sharedInformerFactory
-                .sharedIndexInformerForCustomResource(customResourceDefinitionContext,Memcached.class, MemcachedList.class,5 * 60 * 1000);
+                .sharedIndexInformerForCustomResource(customResourceDefinitionContext,Memcached.class, MemcachedList.class,1 * 60 * 1000);
 
         MemcachedController memcachedController =  new MemcachedController(kubernetesClient,podSharedIndexInformer,memcachedSharedIndexInformer,sharedInformerFactory);
         memcachedController.create();
