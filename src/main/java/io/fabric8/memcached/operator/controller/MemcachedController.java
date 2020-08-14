@@ -118,6 +118,7 @@ public class MemcachedController {
     public void run() throws InterruptedException {
         this.initializeDefaultController();
         Manager manager = new Manager(sharedInformerFactory,controllers);
+       // getController().clone()
         manager.run();
     }
 
